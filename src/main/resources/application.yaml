@@ -1,0 +1,25 @@
+spring:
+  application:
+    name: notification-service
+
+  # PostgreSQL connection
+  datasource:
+    url: jdbc:postgresql://localhost:5432/notification_db
+    username: user
+    password: password
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+
+  # RabbitMQ connection
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: guest
+    password: guest
