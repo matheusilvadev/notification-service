@@ -2,7 +2,6 @@ spring:
   application:
     name: notification-service
 
-  # PostgreSQL connection
   datasource:
     url: jdbc:postgresql://localhost:5432/notification_db
     username: user
@@ -12,14 +11,23 @@ spring:
   jpa:
     hibernate:
       ddl-auto: update
-    show-sql: true
     properties:
       hibernate:
         format_sql: true
+    show-sql: true
 
-  # RabbitMQ connection
   rabbitmq:
     host: localhost
     port: 5672
     username: guest
     password: guest
+
+# Custom constants for lines
+notification:
+  rabbitmq:
+    exchange: notification.exchange
+    routing-key: notification.routingKey
+    queue: notification.queue
+    dlq-exchange: notification.dlq.exchange
+    dlq-routing-key: notification.dlq.routingKey
+    dlq-queue: notification.dlq.queue
