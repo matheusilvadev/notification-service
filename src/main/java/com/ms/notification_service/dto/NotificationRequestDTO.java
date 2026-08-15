@@ -3,6 +3,7 @@ package com.ms.notification_service.dto;
 
 import com.ms.notification_service.enums.NotificationChannel;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 
 public record NotificationRequestDTO(
         @NotBlank(message = "Recipient is mandatory")
@@ -14,7 +15,7 @@ public record NotificationRequestDTO(
         @NotBlank(message = "Text content is mandatory")
         String content,
 
-        @NotBlank(message = "Chanel is mandatory")
+        @NotNull(message = "Chanel is mandatory")
         NotificationChannel channel,
 
         String originService){
