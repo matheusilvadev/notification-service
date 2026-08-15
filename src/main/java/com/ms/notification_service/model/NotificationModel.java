@@ -1,5 +1,6 @@
 package com.ms.notification_service.model;
 
+import com.ms.notification_service.enums.NotificationChannel;
 import com.ms.notification_service.enums.NotificationStatus;
 import jakarta.persistence.*;
 import lombok.Data;
@@ -21,6 +22,9 @@ public class NotificationModel {
 
     @Column(columnDefinition = "TEXT")
     private String content;
+
+    @Enumerated(EnumType.STRING)
+    private NotificationChannel channel;
 
     @Enumerated(EnumType.STRING)
     private NotificationStatus status;
