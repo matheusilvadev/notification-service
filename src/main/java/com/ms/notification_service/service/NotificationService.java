@@ -10,6 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 
@@ -28,6 +29,7 @@ public class NotificationService {
     private String routingKey;
 
     // Saves as pending and publishes to the queue for a rapid response (RNF < 100ms).
+    @Transactional
     public NotificationModel enqueueNotification(NotificationRequestDTO dto) {
         NotificationModel model = new NotificationModel();
         model.setRecipient(dto.recipient());
@@ -40,8 +42,17 @@ public class NotificationService {
 
         model = repository.save(model);
 
+        NotificationRequestDTO messagePayload = new NotificationRequestDTO(
+                model.getId(),
+                dto.recipient(),
+                dto.subject(),
+                dto.content(),
+                dto.channel(),
+                dto.originService()
+        );
+
         // Publishes to the RabbitMQ queue.
-        rabbitTemplate.convertAndSend(exchange, routingKey, dto);
+        rabbitTemplate.convertAndSend(exchange, routingKey, messagePayload);
 
         return model;
     }
@@ -51,11 +62,23 @@ public class NotificationService {
         log.info("Processing dispatch of [{}] via [{}] to: {}",
                 dto.subject(), dto.channel(), dto.recipient());
 
+        NotificationModel notification = repository.findById(dto.id())
+                .orElseThrow(() -> new IllegalArgumentException("Notification not found with ID: " + dto.id()));
+
+
         try {
             sendExternalNotification(dto);
-            log.info("Notification successfully delivered!");
+
+            notification.setStatus(NotificationStatus.SENT);
+            repository.save(notification);
+
+            log.info("Notification ID {} successfully delivered!", dto.id());
         } catch (Exception e){
             log.error("Error sending notification. Redirecting if retries are exhausted!");
+
+            notification.setStatus(NotificationStatus.ERROR);
+            repository.save(notification);
+
             throw e;
         }
     }

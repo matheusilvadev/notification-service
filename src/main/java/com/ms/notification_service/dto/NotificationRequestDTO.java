@@ -5,7 +5,11 @@ import com.ms.notification_service.enums.NotificationChannel;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
+import java.util.UUID;
+
 public record NotificationRequestDTO(
+        UUID id,
+
         @NotBlank(message = "Recipient is mandatory")
         String recipient,
 
