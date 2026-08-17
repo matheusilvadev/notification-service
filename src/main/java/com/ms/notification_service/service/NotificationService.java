@@ -5,6 +5,7 @@ import com.ms.notification_service.dto.NotificationRequestDTO;
 import com.ms.notification_service.enums.NotificationStatus;
 import com.ms.notification_service.model.NotificationModel;
 import com.ms.notification_service.repository.NotificationRepository;
+import com.ms.notification_service.strategies.NotificationStrategyFactory;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -21,6 +22,7 @@ public class NotificationService {
 
     private final NotificationRepository repository;
     private final RabbitTemplate rabbitTemplate;
+    private final NotificationStrategyFactory strategy;
 
     @Value("${notification.rabbitmq.exchange}")
     private String exchange;
@@ -67,9 +69,9 @@ public class NotificationService {
 
 
         try {
-            sendExternalNotification(dto);
-
+            strategy.getStrategy(dto.channel()).send(dto);
             notification.setStatus(NotificationStatus.SENT);
+
             repository.save(notification);
 
             log.info("Notification ID {} successfully delivered!", dto.id());
